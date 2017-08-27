@@ -81,13 +81,13 @@
   (let ((buf (oref php stdout)))
     (if (and buf (buffer-live-p buf))
         buf
-      (oset php stdout (get-buffer-create (format "*PHP output %s*" (cl-gensym)))))))
+      (oset php stdout (generate-new-buffer "*PHP output*")))))
 
 
 ;; Utility functions
 (defun php-runtime--temp-buffer ()
   "Return new temp buffer."
-  (get-buffer-create (format "*PHP temp %s*" (cl-gensym))))
+  (generate-new-buffer "*PHP temp*"))
 
 
 ;; PHP Execute wrapper function
@@ -110,10 +110,12 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
     (when input-buffer
       (oset execute stdin input-buffer))
 
-    (php-runtime-run-in-command-line execute)
-
-    (prog1 (with-current-buffer (php-runtime-stdout-buffer execute)
-             (buffer-substring-no-properties (point-min) (point-max)))
+    (unwind-protect
+        (progn (php-runtime-run-in-command-line execute)
+               (with-current-buffer (php-runtime-stdout-buffer execute)
+                 (buffer-substring-no-properties (point-min) (point-max))))
+      (when (and input-buffer (buffer-live-p input-buffer))
+        (kill-buffer input-buffer))
       (when php-runtime--kill-temp-output-buffer
         (kill-buffer (php-runtime-stdout-buffer execute))))))
 
