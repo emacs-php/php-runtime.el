@@ -172,8 +172,9 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
             (if (or (bufferp input-buffer)
                     (and (consp input-buffer) (eq :file (car input-buffer))))
                 input-buffer
-              (with-current-buffer temp-input-buffer
-                (insert input-buffer)))))
+              (prog1 temp-input-buffer
+                (with-current-buffer temp-input-buffer
+                  (insert input-buffer))))))
 
     (unwind-protect
         (progn (php-runtime-run execute)
