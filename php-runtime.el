@@ -62,7 +62,7 @@
 ;;;###autoload
 (defclass php-runtime-execute nil
   ((executable :initarg :executable :type string)
-   (code   :initarg :code   :type string)
+   (code   :initarg :code   :type (or null string) :initform nil)
    (stdin  :initarg :stdin  :type (or null buffer) :initform nil)
    (stdout :initarg :stdout :type (or null buffer list) :initform nil)
    (stderr :initarg :stderr :type (or null buffer list) :initform nil)))
