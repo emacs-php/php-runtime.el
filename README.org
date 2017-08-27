@@ -1,2 +1,31 @@
 * php-runtime.el
 This package bridges to [[http://php.net/][PHP: Hypertext Preprocessor]].
+** Example
+#+BEGIN_SRC emacs-lisp
+;; Exapmle simple code
+(php-runtime-eval "echo strtoupper('apple');")
+;;=> "APPLE"
+
+;; Shorthand syntax for a PHP expression
+(php-runtime-expr "strtoupper('apple')")
+;;=> "APPLE"
+
+;; Execute specific PHP executable
+(php-runtime-expr "PHP_VERSION") ; no specific
+;;=> "7.1.8"
+
+(let ((php-runtime-php-executable "/usr/bin/php"))
+  (php-runtime-expr "PHP_VERSION"))
+;;=> "5.6.30"
+
+;; Get numeric value by PHP
+(setq php-int-max (string-to-number (php-runtime-expr "PHP_INT_MAX")))
+
+;; Evalute PHP code with STDIN as a string
+(princ (php-runtime-eval "while ($line = trim(fgets(STDIN))) { var_dump($line); }"
+                         "apple\nbanana\norange"))
+
+;; Evalute PHP code with STDIN as a file
+(princ (php-runtime-eval "while ($line = trim(fgets(STDIN))) { var_dump($line); }"
+                         (cons :file "/etc/hosts")))
+#+END_SRC
