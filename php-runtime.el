@@ -1,4 +1,4 @@
-;;; php-runtime.el --- Language binding bridge to PHP -*- lexical-binding:t -*-
+;;; php-runtime.el --- Language binding bridge to PHP -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2017 USAMI Kenta
 
