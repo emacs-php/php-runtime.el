@@ -45,7 +45,7 @@
   :group 'processes
   :group 'php)
 
-(defcustom php-runtime-php-executable (and (executable-find "php") "php")
+(defcustom php-runtime-php-executable (or (executable-find "php") "php")
   "A command name or path to PHP executable."
   :group 'php-runtime
   :type 'string)
