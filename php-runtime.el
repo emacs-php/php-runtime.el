@@ -82,70 +82,96 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 ;; PHP Execute class
 
 ;;;###autoload
-(defclass php-runtime-execute nil
-  ((executable :initarg :executable :type string)
-   (code   :initarg :code   :type (satisfies php-runtime--code-satisfied-p))
-   (stdin  :initarg :stdin  :type (satisfies php-runtime--stdin-satisfied-p) :initform nil)
-   (stdout :initarg :stdout :type (or null buffer-live list) :initform nil)
-   (stderr :initarg :stderr :type (or null buffer-live list) :initform nil)))
+(defun php-runtime-execute (&rest plist)
+  "Construct `php-execute' object from `PLIST'."
+  (let (executable code stdin stdout stderr)
+    (setq executable (or (plist-get plist :executable) php-runtime-php-executable))
 
-(defmethod php-runtime-run ((php php-runtime-execute))
+    (if (php-runtime--code-satisfied-p (plist-get plist :code))
+        (setq code (plist-get plist :code))
+      (error ":code %s is malformed" (plist-get plist :code)))
+
+    (if (php-runtime--stdin-satisfied-p (plist-get plist :stdin))
+        (setq stdin (plist-get plist :stdin))
+      (error ":stdin %s is malformed" (plist-get plist :stdin)))
+
+    (setq stdout (plist-get plist :stdout))
+    (setq stderr (plist-get plist :stderr))
+
+    (cons 'php-runtime-execute
+          (list (cons :executable executable)
+                (cons :code code)
+                (cons :stdin stdin)
+                (cons :stdout stdout)
+                (cons :stderr stderr)))))
+
+(defun php-runtime-execute--get (obj key)
+  "Get value from `OBJ' object by symbol `KEY'."
+  (unless (eq 'php-runtime-execute (car obj))
+    (error "OBJ is not php-runtime-execute object"))
+  (let ((value (assq key (cdr obj))))
+    (if value
+        (cdr value)
+      (error "KEY %s is not exists" key))))
+
+
+(defun php-runtime-run (php)
   "Execute PHP process using `php -r' with code.
 
 This execution method is affected by the number of character limit of OS command arguments.
 You can check the limitation by command, for example \(shell-command-to-string \"getconf ARG_MAX\") ."
   (let ((args (list (php-runtime--get-command-line-arg php))))
-    (if (and (oref php stdin) (not (php-runtime--stdin-by-file-p php)))
+    (if (and (php-runtime-execute--get php :stdin) (not (php-runtime--stdin-by-file-p php)))
         (php-runtime--call-php-process-with-input-buffer php args)
       (php-runtime--call-php-process php args))))
 
-(defmethod php-runtime--call-php-process ((php php-runtime-execute) args)
+(defun php-runtime--call-php-process (php args)
   "Execute PHP Process by php-execute `PHP' and `ARGS'."
-  (apply #'call-process (oref php executable)
+  (apply #'call-process (php-runtime-execute--get php :executable)
          (php-runtime--get-input php) ;input
          (cons (php-runtime-stdout-buffer php)
-               (oref php stderr))
+               (php-runtime-execute--get php :stderr))
          nil ; suppress display
          args))
 
-(defmethod php-runtime--call-php-process-with-input-buffer ((php php-runtime-execute) args)
+(defun php-runtime--call-php-process-with-input-buffer (php args)
   "Execute PHP Process with STDIN by php-execute `PHP' and `ARGS'."
-  (unless (buffer-live-p (oref php stdin))
+  (unless (buffer-live-p (php-runtime-execute--get php :stdin))
     (error "STDIN buffer is not available"))
-  (with-current-buffer (oref php stdin)
+  (with-current-buffer (php-runtime-execute--get php :stdin)
     (apply #'call-process-region (point-min) (point-max)
-           (oref php executable)
+           (php-runtime-execute--get php :executable)
            nil ;delete
            (cons (php-runtime-stdout-buffer php)
-                 (oref php stderr))
+                 (php-runtime-execute--get php :stderr))
            nil ; suppress display
            args)))
 
-(defmethod php-runtime--get-command-line-arg ((php php-runtime-execute))
+(defun php-runtime--get-command-line-arg (php)
   "Return command line string"
-  (let ((code (oref php code)))
+  (let ((code (php-runtime-execute--get php :code)))
     (cl-case (car code)
       (:file (cdr code))
       (:string (concat "-r" (cdr code))))))
 
-(defmethod php-runtime--stdin-by-file-p ((php php-runtime-execute))
-  "Return T if \(oref php stdin) is file."
-  (let ((stdin (oref php stdin)))
+(defun php-runtime--stdin-by-file-p (php)
+  "Return T if \(php-runtime-execute--get php :stdin) is file."
+  (let ((stdin (php-runtime-execute--get php :stdin)))
     (and (consp stdin)
          (eq :file (car stdin)))))
 
-(defmethod php-runtime--get-input ((php php-runtime-execute))
+(defun php-runtime--get-input (php)
   ""
   (if (php-runtime--stdin-by-file-p php)
-      (cdr (oref php stdin))
+      (cdr (php-runtime-execute--get php :stdin))
     nil))
 
-(defmethod php-runtime-stdout-buffer ((php php-runtime-execute))
+(defun php-runtime-stdout-buffer (php)
   "Return output buffer."
-  (let ((buf (oref php stdout)))
+  (let ((buf (php-runtime-execute--get php :stdout)))
     (if (and buf (buffer-live-p buf))
         buf
-      (oset php stdout (generate-new-buffer "*PHP output*")))))
+      (push (cons :stdout (generate-new-buffer "*PHP output*")) php))))
 
 
 ;; PHP Execute wrapper function
@@ -168,13 +194,15 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
         (temp-input-buffer (when (and input-buffer (not (bufferp input-buffer)))
                              (php-runtime--temp-buffer))))
     (when input-buffer
-      (oset execute stdin
-            (if (or (bufferp input-buffer)
-                    (and (consp input-buffer) (eq :file (car input-buffer))))
-                input-buffer
-              (prog1 temp-input-buffer
-                (with-current-buffer temp-input-buffer
-                  (insert input-buffer))))))
+      (push
+       (cons :stdin
+             (if (or (bufferp input-buffer)
+                     (and (consp input-buffer) (eq :file (car input-buffer))))
+                 input-buffer
+               (prog1 temp-input-buffer
+                 (with-current-buffer temp-input-buffer
+                   (insert input-buffer)))))
+       execute))
 
     (unwind-protect
         (progn (php-runtime-run execute)
