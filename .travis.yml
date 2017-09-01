@@ -2,7 +2,7 @@ language: emacs-lisp
 sudo: required
 
 before_install:
-  - sudo apt-get install php emacs-nox
+  - sudo apt-get install php5 emacs24-nox
 
 script:
   - emacs -Q --batch --eval '(message (emacs-version))'
