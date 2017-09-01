@@ -1,0 +1,9 @@
+language: emacs-lisp
+sudo: required
+
+before_install:
+  - sudo apt-get install php emacs-nox
+
+script:
+  - emacs -Q --batch --eval '(message (emacs-version))'
+  - make test
