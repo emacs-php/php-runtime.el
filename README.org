@@ -1,5 +1,8 @@
 * php-runtime.el
 This package bridges to [[http://php.net/][PHP: Hypertext Preprocessor]].
+** Requirements
+- [[https://www.gnu.org/software/emacs/][GNU Emacs]] 25+
+- [[https://secure.php.net/downloads.php][PHP]]
 ** Example
 #+BEGIN_SRC emacs-lisp
 ;; Exapmle simple code
