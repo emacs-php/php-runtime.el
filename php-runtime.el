@@ -81,11 +81,14 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 
 ;; PHP Execute class
 
+(cl-deftype php-runtime--code  () '(satisfies php-runtime--code-satisfied-p))
+(cl-deftype php-runtime--stdin () '(satisfies php-runtime--stdin-satisfied-p))
+
 ;;;###autoload
 (defclass php-runtime-execute nil
   ((executable :initarg :executable :type string)
-   (code   :initarg :code   :type (satisfies php-runtime--code-satisfied-p))
-   (stdin  :initarg :stdin  :type (satisfies php-runtime--stdin-satisfied-p) :initform nil)
+   (code   :initarg :code   :type php-runtime--code)
+   (stdin  :initarg :stdin  :type php-runtime--stdin :initform nil)
    (stdout :initarg :stdout :type (or null buffer-live list) :initform nil)
    (stderr :initarg :stderr :type (or null buffer-live list) :initform nil)))
 
