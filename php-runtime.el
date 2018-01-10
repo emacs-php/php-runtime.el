@@ -7,7 +7,7 @@
 ;; Version: 0.0.1
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "25") (cl-lib "0.5"))
 
 ;; This file is NOT part of GNU Emacs.
 
