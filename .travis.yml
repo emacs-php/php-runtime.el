@@ -1,8 +1,20 @@
 language: emacs-lisp
 sudo: required
+env:
+  matrix:
+    - EMACS_VERSION=emacs-25.1-travis
+    - EMACS_VERSION=emacs-25.2-travis
+    - EMACS_VERSION=emacs-25.3-travis
+    - EMACS_VERSION=emacs-git-snapshot-travis
+# matrix:
+#   allow_failures:
+#   - env: EMACS_VERSION=emacs-git-snapshot-travis
 
 before_install:
-  - sudo apt-get install php5 emacs24-nox
+  - export PATH="/home/travis/.evm/bin:$PATH"
+  - git clone https://github.com/rejeep/evm.git /home/travis/.evm
+  - evm config path /tmp
+  - evm install $EMACS_VERSION --use || true
 
 script:
   - emacs -Q --batch --eval '(message (emacs-version))'
