@@ -1,6 +1,6 @@
 ;;; php-runtime.el --- Language binding bridge to PHP -*- lexical-binding: t -*-
 
-;; Copyright (C) 2017 USAMI Kenta
+;; Copyright (C) 2018 Friends of Emacs-PHP development
 
 ;; Author: USAMI Kenta <tadsan@zonu.me>
 ;; Created: 28 Aug 2017
