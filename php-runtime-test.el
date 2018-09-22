@@ -68,5 +68,9 @@ while (($line = fgets(STDIN)) !== false) {
   (should (string= "200" (php-runtime-expr "(1+1)*100")))
   (should (string= "foo" (php-runtime-expr "'f' . 'oo'"))))
 
+(ert-deftest php-runtime-test-expr-syntax-error ()
+  "Test that PHP code syntax errors are reported as errors in Emacs."
+  (should-error (php-runtime-expr "a:b")))
+
 (provide 'php-runtime-test)
 ;;; php-runtime-test.el ends here

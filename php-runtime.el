@@ -177,9 +177,12 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
                   (insert input-buffer))))))
 
     (unwind-protect
-        (progn (php-runtime-run execute)
-               (with-current-buffer (php-runtime-stdout-buffer execute)
-                 (buffer-substring-no-properties (point-min) (point-max))))
+        (let ((status (php-runtime-run execute))
+              (output (with-current-buffer (php-runtime-stdout-buffer execute)
+                        (buffer-substring-no-properties (point-min) (point-max)))))
+          (unless (eq 0 status)
+            (error output))
+          output)
       (when (and temp-input-buffer (buffer-live-p temp-input-buffer))
         (kill-buffer temp-input-buffer))
       (when php-runtime--kill-temp-output-buffer
