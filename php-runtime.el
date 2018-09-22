@@ -33,7 +33,6 @@
 ;;
 ;;     (string-to-number (php-runtime-expr "PHP_INT_MAX")) ; short hand
 ;;
-
 
 ;;; Code:
 (require 'cl-lib)
@@ -55,7 +54,6 @@
 (defconst php-runtime-error-buffer-name "*PHP Error Messages*")
 
 (defvar php-runtime--kill-temp-output-buffer t)
-
 
 ;; Utility functions
 (defun php-runtime--temp-buffer ()
@@ -159,7 +157,6 @@ You can check the limitation by command, for example \(shell-command-to-string \
     (if (and buf (buffer-live-p buf))
         buf
       (oset php stdout (generate-new-buffer "*PHP output*")))))
-
 
 ;; PHP Execute wrapper function
 
