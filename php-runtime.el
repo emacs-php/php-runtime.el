@@ -175,13 +175,13 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
   "Evalute PHP code `CODE' without open tag, and return buffer.
 
 Pass `INPUT-BUFFER' to PHP executable as STDIN."
-  (let ((execute (php-runtime-execute :code (cons :string code)
+  (let ((executor (php-runtime-execute :code (cons :string code)
                            :executable php-runtime-php-executable
                            :stderr (get-buffer-create php-runtime-error-buffer-name)))
         (temp-input-buffer (when (and input-buffer (not (bufferp input-buffer)))
                              (php-runtime--temp-buffer))))
     (when input-buffer
-      (oset execute stdin
+      (oset executor stdin
             (if (or (bufferp input-buffer)
                     (and (consp input-buffer) (eq :file (car input-buffer))))
                 input-buffer
@@ -190,11 +190,11 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
                   (insert input-buffer))))))
 
     (unwind-protect
-        (php-runtime-process execute)
+        (php-runtime-process executor)
       (when (and temp-input-buffer (buffer-live-p temp-input-buffer))
         (kill-buffer temp-input-buffer))
       (when php-runtime--kill-temp-output-buffer
-        (kill-buffer (php-runtime-stdout-buffer execute))))))
+        (kill-buffer (php-runtime-stdout-buffer executor))))))
 
 (provide 'php-runtime)
 ;;; php-runtime.el ends here
