@@ -78,6 +78,11 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
        (member (car obj) (list :file :string))
        (stringp (cdr obj))))
 
+(defun php-runtime-default-handler (status output)
+  "Return `OUTPUT', and raise error when `STATUS' is not 0."
+  (if (eq 0 status)
+      output
+    (error output)))
 
 ;; PHP Execute class
 
@@ -85,12 +90,13 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 (defclass php-runtime-execute nil
   ((executable :initarg :executable :type string)
    (code   :initarg :code   :type (satisfies php-runtime--code-satisfied-p))
+   (handler :initarg :handler :type function :initform #'php-runtime-default-handler)
    (stdin  :initarg :stdin  :type (satisfies php-runtime--stdin-satisfied-p) :initform nil)
    (stdout :initarg :stdout :type (or null buffer-live list) :initform nil)
    (stderr :initarg :stderr :type (or null buffer-live list) :initform nil)))
 
 (cl-defmethod php-runtime-run ((php php-runtime-execute))
-  "Execute PHP process using `php -r' with code.
+  "Execute PHP process using `php -r' with code and return status code.
 
 This execution method is affected by the number of character limit of OS command arguments.
 You can check the limitation by command, for example \(shell-command-to-string \"getconf ARG_MAX\") ."
@@ -98,6 +104,13 @@ You can check the limitation by command, for example \(shell-command-to-string \
     (if (and (oref php stdin) (not (php-runtime--stdin-by-file-p php)))
         (php-runtime--call-php-process-with-input-buffer php args)
       (php-runtime--call-php-process php args))))
+
+(cl-defmethod php-runtime-process ((php php-runtime-execute))
+  "Execute PHP process using `php -r' with code and return output."
+  (let ((status (php-runtime-run php))
+        (output (with-current-buffer (php-runtime-stdout-buffer php)
+                  (buffer-substring-no-properties (point-min) (point-max)))))
+    (funcall (oref php handler) status output)))
 
 (cl-defmethod php-runtime--call-php-process ((php php-runtime-execute) args)
   "Execute PHP Process by php-execute `PHP' and `ARGS'."
@@ -177,12 +190,7 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
                   (insert input-buffer))))))
 
     (unwind-protect
-        (let ((status (php-runtime-run execute))
-              (output (with-current-buffer (php-runtime-stdout-buffer execute)
-                        (buffer-substring-no-properties (point-min) (point-max)))))
-          (unless (eq 0 status)
-            (error output))
-          output)
+        (php-runtime-process execute)
       (when (and temp-input-buffer (buffer-live-p temp-input-buffer))
         (kill-buffer temp-input-buffer))
       (when php-runtime--kill-temp-output-buffer
