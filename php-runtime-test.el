@@ -1,8 +1,9 @@
 ;;; php-runtime-test.el --- Unit tests for php-runtime package.
 
 ;; Copyright (C) 2017 USAMI Kenta
+;; Copyright (C) 2018 Eric James Michael Ritz
 
-;; Author: USAMI Kenta <tadsan@zonu.me>
+;; Authors: USAMI Kenta <tadsan@zonu.me>
 ;; Created: 28 Aug 2017
 ;; Version: 0.0.1
 ;; Keywords: processes php
@@ -37,39 +38,47 @@
 (require 'php-runtime)
 (require 'ert)
 
-(ert-deftest php-runtime-test-eval-with-stdin ()
-  (dolist (v (list '("Input buffer as string"
-                     :expected "1 apple\n2 orange\n3 banana\n"
-                     :code "$i = 0;
-while (($line = fgets(STDIN)) !== false) {
-    echo ++$i, ' ', trim($line), \"\n\";
-}"
-                     :input-buf "apple\norange\nbanana")))
-    (let ((description (car v))
-          (expected (plist-get (cdr v) :expected))
-          (code (plist-get (cdr v) :code))
-          (input-buf (plist-get (cdr v) :input-buf)))
-      (should (string= expected (php-runtime-eval code input-buf))))))
+(defun run-simple-php (code)
+  "Utility function to run CODE for simple PHP testing.
 
-(ert-deftest php-runtime-test-eval-without-stdin ()
-  (dolist (v (list '("No input buffer"
-                     :expected ""
-                     :code "$i = 0;
-while (($line = fgets(STDIN)) !== false) {
-    echo ++$i, ' ', trim($line), \"\n\";
-}")))
-    (let ((description (car v))
-          (expected (plist-get (cdr v) :expected))
-          (code (plist-get (cdr v) :code)))
-      (should (string= expected (php-runtime-eval code))))))
+This function accepts PHP code as a string and runs it using
+whichever PHP executable is available on the system.  In order to
+reduce sources of potential problems, we do not load any PHP INI
+or other configurations.
 
-(ert-deftest php-runtime-test-expr ()
-  "Test that PHP expressions are evaluated and get results."
+The function returns the result of the code as a string."
+  ;; We call PHP with two options:
+  ;;
+  ;; 1. `-n` - Causes PHP to ignore any system-wide INI, because we
+  ;;    don't want any such configuration screwing up our tests.
+  ;;
+  ;; 2. `-r` - Tells PHP to run the code which follows, which we must
+  ;;    quote appropriately as a shell argument.
+  (shell-command-to-string (concat "php -n -r" (shell-quote-argument code))))
+
+(ert-deftest runtime-expressions ()
+  "Test using `php-runtime-expr'.
+
+We can make explicit invocations of the PHP executable to obtain
+the values of various runtime expressions.  These tests compare
+those to the values we obtain via `php-runtime-expr', which
+should always be the same."
+  ;; Testing simple constants.
+  (should (string= (php-runtime-expr "PHP_VERSION")
+		   (run-simple-php "echo PHP_VERSION;")))
+  ;; Testing simple function calls.
+  (should (string= (php-runtime-expr "strtoupper('foobar')")
+		   (run-simple-php "echo strtoupper('foobar');")))
+  ;; Testing basic math.
   (should (string= "200" (php-runtime-expr "(1+1)*100")))
-  (should (string= "foo" (php-runtime-expr "'f' . 'oo'"))))
+  ;; Testing string concatenation.
+  (should (string= "foo" (php-runtime-expr "'f' . 'oo'")))
+  ;; Converting output to numbers.
+  (should (= (string-to-number (php-runtime-expr "PHP_INT_MAX"))
+	     (string-to-number (run-simple-php "echo PHP_INT_MAX;")))))
 
-(ert-deftest php-runtime-test-expr-syntax-error ()
-  "Test that PHP code syntax errors are reported as errors in Emacs."
+(ert-deftest php-syntax-errors ()
+  "Test that PHP code with errors cause appropriate failures."
   (should-error (php-runtime-expr "a:b")))
 
 (provide 'php-runtime-test)
