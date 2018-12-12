@@ -32,3 +32,16 @@ This package bridges to [[http://php.net/][PHP: Hypertext Preprocessor]].
 (princ (php-runtime-eval "while ($line = trim(fgets(STDIN))) { var_dump($line); }"
                          (cons :file "/etc/hosts")))
 #+END_SRC
+*** Construct PHP expression
+#+BEGIN_SRC emacs-lisp
+(php-runtime-\' "You're wellcome.")
+;;=> "'You\\'re wellcome.'"
+
+(let ((a "You'er")
+      (b "wellcome"))
+  (php-runtime-expr
+   (format "implode([%s, %s], ' ')"
+           (php-runtime-\' a)
+           (php-runtime-\' b))))
+;;=> "'You\\'re wellcome.'"
+#+END_SRC
