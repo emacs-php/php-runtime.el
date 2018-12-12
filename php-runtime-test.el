@@ -4,7 +4,7 @@
 
 ;; Author: USAMI Kenta <tadsan@zonu.me>
 ;; Created: 28 Aug 2017
-;; Version: 0.0.1
+;; Version: 0.2.0
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
