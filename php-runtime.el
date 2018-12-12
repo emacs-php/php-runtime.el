@@ -7,7 +7,7 @@
 ;; Version: 0.1.0
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
-;; Package-Requires: ((emacs "25") (cl-lib "0.5") (s "1.12"))
+;; Package-Requires: ((emacs "25") (cl-lib "0.5") (f "0.20") (s "1.7"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -38,6 +38,7 @@
 (require 'cl-lib)
 (require 'eieio)
 (require 's)
+(require 'f)
 
 (defgroup php-runtime nil
   "Language binding bridge to PHP"
