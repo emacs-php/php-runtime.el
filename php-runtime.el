@@ -56,6 +56,7 @@
 (defconst php-runtime--null (eval-when-compile (char-to-string 0)))
 
 (defvar php-runtime--kill-temp-output-buffer t)
+(defvar php-runtime--eval-temp-script-name nil)
 
 ;; Utility functions
 (defun php-runtime--temp-buffer ()
@@ -77,6 +78,16 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
   (and (consp obj)
        (member (car obj) (list :file :string))
        (stringp (cdr obj))))
+
+(defun php-runtime--save-temp-script (code)
+  "Save `CODE' to temporary PHP script and return file path of it."
+  (let ((file-path (or php-runtime--eval-temp-script-name
+                       (f-join temporary-file-directory "php-runtime-eval.php"))))
+    (with-temp-file file-path
+      (erase-buffer)
+      (insert php-runtime-php-open-tag)
+      (insert code))
+    file-path))
 
 (defun php-runtime-default-handler (status output)
   "Return `OUTPUT', and raise error when `STATUS' is not 0."
@@ -182,9 +193,11 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
   "Evalute PHP code `CODE' without open tag, and return buffer.
 
 Pass `INPUT-BUFFER' to PHP executable as STDIN."
-  (let ((executor (php-runtime-execute :code (cons :string code)
-                           :executable php-runtime-php-executable
-                           :stderr (get-buffer-create php-runtime-error-buffer-name)))
+  (let ((executor (php-runtime-execute :code (if (php-runtime-string-has-null-byte code)
+                                      (cons :file (php-runtime--save-temp-script code))
+                                    (cons :string code))
+                            :executable php-runtime-php-executable
+                            :stderr (get-buffer-create php-runtime-error-buffer-name)))
         (temp-input-buffer (when (and input-buffer (not (bufferp input-buffer)))
                              (php-runtime--temp-buffer))))
     (when input-buffer

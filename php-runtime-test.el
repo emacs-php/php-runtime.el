@@ -94,6 +94,10 @@ while (($line = fgets(STDIN)) !== false) {
                 :input "\\"
                 :expected "'\\\\'"
                 :length 1)
+               ("Just only null"
+                :input "\0"
+                :expected "'\0'"
+                :length 1)
                ("Just only newline (LF)"
                 :input "
 "
