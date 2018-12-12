@@ -86,6 +86,10 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 (defun php-runtime-string-has-null-byte (string)
   "Return T when `STRING' has null bytes."
   (s-contains-p php-runtime--null string))
+
+(defun php-runtime-quote-string (string)
+  "Quote `STRING' for PHP's single quote literal."
+  (concat "'" (s-replace "'" "\\'" (s-replace "\\" "\\\\" string)) "'"))
 
 ;; PHP Execute class
 

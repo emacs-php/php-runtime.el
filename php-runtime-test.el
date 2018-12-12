@@ -76,5 +76,39 @@ while (($line = fgets(STDIN)) !== false) {
   "Test that PHP code contains null byte."
   (should (eq t (php-runtime-string-has-null-byte "a\0b"))))
 
+(ert-deftest php-runtime-test-quote-string ()
+  "Test that PHP expressions are evaluated and get results."
+  (dolist (v `(("Empty string"
+                :input ""
+                :expected "''"
+                :length 0)
+               ("Just only あ"
+                :input "あ"
+                :expected "'あ'"
+                :length 3)
+               ("Just only '"
+                :input "'"
+                :expected "'\\\''"
+                :length 1)
+               ("Just only \\"
+                :input "\\"
+                :expected "'\\\\'"
+                :length 1)
+               ("Just only newline (LF)"
+                :input "
+"
+                :expected "'
+'"
+                :length 1)
+
+               ))
+    (let* ((description (car v))
+           (expected (plist-get (cdr v) :expected))
+           (length (plist-get (cdr v) :length))
+           (php-literal (php-runtime-quote-string (plist-get (cdr v) :input))))
+      (should (string= expected php-literal))
+      (should (eq length (string-to-number
+                          (php-runtime-expr (format "strlen(%s)" php-literal))))))))
+
 (provide 'php-runtime-test)
 ;;; php-runtime-test.el ends here
