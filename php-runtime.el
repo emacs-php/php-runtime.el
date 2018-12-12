@@ -51,8 +51,8 @@
   :type 'string)
 
 (defconst php-runtime-php-open-tag "<?php ")
-
 (defconst php-runtime-error-buffer-name "*PHP Error Messages*")
+(defconst php-runtime--null (eval-when-compile (char-to-string 0)))
 
 (defvar php-runtime--kill-temp-output-buffer t)
 
@@ -82,6 +82,10 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
   (if (eq 0 status)
       output
     (error output)))
+
+(defun php-runtime-string-has-null-byte (string)
+  "Return T when `STRING' has null bytes."
+  (s-contains-p php-runtime--null string))
 
 ;; PHP Execute class
 

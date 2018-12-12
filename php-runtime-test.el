@@ -72,5 +72,9 @@ while (($line = fgets(STDIN)) !== false) {
   "Test that PHP code syntax errors are reported as errors in Emacs."
   (should-error (php-runtime-expr "a:b")))
 
+(ert-deftest php-runtime-test-has-null-byte ()
+  "Test that PHP code contains null byte."
+  (should (eq t (php-runtime-string-has-null-byte "a\0b"))))
+
 (provide 'php-runtime-test)
 ;;; php-runtime-test.el ends here
