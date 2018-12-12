@@ -102,6 +102,9 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 (defun php-runtime-quote-string (string)
   "Quote `STRING' for PHP's single quote literal."
   (concat "'" (s-replace "'" "\\'" (s-replace "\\" "\\\\" string)) "'"))
+
+(defalias 'php-runtime-\' #'php-runtime-quote-string)
+
 
 ;; PHP Execute class
 
