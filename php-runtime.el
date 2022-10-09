@@ -7,7 +7,7 @@
 ;; Version: 0.2.0
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
-;; Package-Requires: ((emacs "25.1") (f "0.20") (s "1.7"))
+;; Package-Requires: ((emacs "25.1") (s "1.7"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -38,7 +38,6 @@
 (require 'cl-lib)
 (require 'eieio)
 (require 's)
-(require 'f)
 
 (defgroup php-runtime nil
   "Language binding bridge to PHP."
@@ -82,7 +81,7 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 (defun php-runtime--save-temp-script (code)
   "Save `CODE' to temporary PHP script and return file path of it."
   (let ((file-path (or php-runtime--eval-temp-script-name
-                       (f-join temporary-file-directory "php-runtime-eval.php"))))
+                       (expand-file-name "php-runtime-eval.php" temporary-file-directory))))
     (with-temp-file file-path
       (erase-buffer)
       (insert php-runtime-php-open-tag)
