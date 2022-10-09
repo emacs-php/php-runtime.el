@@ -7,7 +7,7 @@
 ;; Version: 0.2.0
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
-;; Package-Requires: ((emacs "25") (cl-lib "0.5") (f "0.20") (s "1.7"))
+;; Package-Requires: ((emacs "25.1") (f "0.20") (s "1.7"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -41,7 +41,7 @@
 (require 'f)
 
 (defgroup php-runtime nil
-  "Language binding bridge to PHP"
+  "Language binding bridge to PHP."
   :tag "PHP Runtime"
   :group 'processes
   :group 'php)
@@ -90,17 +90,17 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
     file-path))
 
 (defun php-runtime-default-handler (status output)
-  "Return `OUTPUT', and raise error when `STATUS' is not 0."
+  "Return OUTPUT, and raise error when STATUS is not 0."
   (if (eq 0 status)
       output
     (error output)))
 
 (defun php-runtime-string-has-null-byte (string)
-  "Return T when `STRING' has null bytes."
+  "Return T when STRING has null bytes."
   (s-contains-p php-runtime--null string))
 
 (defun php-runtime-quote-string (string)
-  "Quote `STRING' for PHP's single quote literal."
+  "Quote STRING for PHP's single quote literal."
   (concat "'" (s-replace "'" "\\'" (s-replace "\\" "\\\\" string)) "'"))
 
 (defalias 'php-runtime-\' #'php-runtime-quote-string)
@@ -120,8 +120,9 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 (cl-defmethod php-runtime-run ((php php-runtime-execute))
   "Execute PHP process using `php -r' with code and return status code.
 
-This execution method is affected by the number of character limit of OS command arguments.
-You can check the limitation by command, for example \(shell-command-to-string \"getconf ARG_MAX\") ."
+This execution method is affected by the number of character limit of OS command
+arguments.  You can check the limitation by command, for example
+\(shell-command-to-string \"getconf ARG_MAX\") ."
   (let ((args (list (php-runtime--get-command-line-arg php))))
     (if (and (oref php stdin) (not (php-runtime--stdin-by-file-p php)))
         (php-runtime--call-php-process-with-input-buffer php args)
@@ -135,7 +136,7 @@ You can check the limitation by command, for example \(shell-command-to-string \
     (funcall (oref php handler) status output)))
 
 (cl-defmethod php-runtime--call-php-process ((php php-runtime-execute) args)
-  "Execute PHP Process by php-execute `PHP' and `ARGS'."
+  "Execute PHP Process by php-execute PHP and ARGS."
   (apply #'call-process (oref php executable)
          (php-runtime--get-input php) ;input
          (cons (php-runtime-stdout-buffer php)
@@ -144,7 +145,7 @@ You can check the limitation by command, for example \(shell-command-to-string \
          args))
 
 (cl-defmethod php-runtime--call-php-process-with-input-buffer ((php php-runtime-execute) args)
-  "Execute PHP Process with STDIN by php-execute `PHP' and `ARGS'."
+  "Execute PHP Process with STDIN by php-execute PHP and ARGS."
   (unless (buffer-live-p (oref php stdin))
     (error "STDIN buffer is not available"))
   (with-current-buffer (oref php stdin)
@@ -157,26 +158,26 @@ You can check the limitation by command, for example \(shell-command-to-string \
            args)))
 
 (cl-defmethod php-runtime--get-command-line-arg ((php php-runtime-execute))
-  "Return command line string"
+  "Return PHP command line string."
   (let ((code (oref php code)))
     (cl-case (car code)
       (:file (cdr code))
       (:string (concat "-r" (cdr code))))))
 
 (cl-defmethod php-runtime--stdin-by-file-p ((php php-runtime-execute))
-  "Return T if \(oref php stdin) is file."
+  "Return T if \(oref php stdin) is PHP file."
   (let ((stdin (oref php stdin)))
     (and (consp stdin)
          (eq :file (car stdin)))))
 
 (cl-defmethod php-runtime--get-input ((php php-runtime-execute))
-  ""
+  "Return PHP input buffer or NIL."
   (if (php-runtime--stdin-by-file-p php)
       (cdr (oref php stdin))
     nil))
 
 (cl-defmethod php-runtime-stdout-buffer ((php php-runtime-execute))
-  "Return output buffer."
+  "Return PHP output buffer."
   (let ((buf (oref php stdout)))
     (if (and buf (buffer-live-p buf))
         buf
@@ -186,16 +187,16 @@ You can check the limitation by command, for example \(shell-command-to-string \
 
 ;;;###autoload
 (defun php-runtime-expr (php-expr &optional input-buffer)
-  "Evalute and echo PHP expression `PHP-EXPR'.
+  "Evalute and echo PHP expression PHP-EXPR.
 
-Pass `INPUT-BUFFER' to PHP executable as STDIN."
+Pass INPUT-BUFFER to PHP executable as STDIN."
   (php-runtime-eval (format "echo %s;" php-expr) input-buffer))
 
 ;;;###autoload
 (defun php-runtime-eval (code &optional input-buffer)
-  "Evalute PHP code `CODE' without open tag, and return buffer.
+  "Evalute PHP code CODE without open tag, and return buffer.
 
-Pass `INPUT-BUFFER' to PHP executable as STDIN."
+Pass INPUT-BUFFER to PHP executable as STDIN."
   (let ((executor (php-runtime-execute :code (if (php-runtime-string-has-null-byte code)
                                       (cons :file (php-runtime--save-temp-script code))
                                     (cons :string code))
@@ -211,7 +212,6 @@ Pass `INPUT-BUFFER' to PHP executable as STDIN."
               (prog1 temp-input-buffer
                 (with-current-buffer temp-input-buffer
                   (insert input-buffer))))))
-
     (unwind-protect
         (php-runtime-process executor)
       (when (and temp-input-buffer (buffer-live-p temp-input-buffer))
