@@ -195,7 +195,7 @@ Pass INPUT-BUFFER to PHP executable as STDIN."
   (php-runtime-eval (format "echo %s;" php-expr) input-buffer))
 
 ;;;###autoload
-(defun php-runtime-eval (code &optional input-buffer)
+(defun php-runtime-eval (code &optional input-buffer output-buffer)
   "Evalute PHP code CODE without open tag, and return buffer.
 
 Pass INPUT-BUFFER to PHP executable as STDIN."
@@ -203,6 +203,7 @@ Pass INPUT-BUFFER to PHP executable as STDIN."
                                       (cons :file (php-runtime--save-temp-script code))
                                     (cons :string code))
                             :executable php-runtime-php-executable
+                            :stdout output-buffer
                             :stderr (get-buffer-create php-runtime-error-buffer-name)))
         (temp-input-buffer (when (and input-buffer (not (bufferp input-buffer)))
                              (php-runtime--temp-buffer))))
