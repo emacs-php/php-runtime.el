@@ -24,11 +24,11 @@ This package bridges to [[http://php.net/][PHP: Hypertext Preprocessor]].
 ;; Get numeric value by PHP
 (setq php-int-max (string-to-number (php-runtime-expr "PHP_INT_MAX")))
 
-;; Evalute PHP code with STDIN as a string
+;; Evaluate PHP code with STDIN as a string
 (princ (php-runtime-eval "while ($line = trim(fgets(STDIN))) { var_dump($line); }"
                          "apple\nbanana\norange"))
 
-;; Evalute PHP code with STDIN as a file
+;; Evaluate PHP code with STDIN as a file
 (princ (php-runtime-eval "while ($line = trim(fgets(STDIN))) { var_dump($line); }"
                          (cons :file "/etc/hosts")))
 #+END_SRC

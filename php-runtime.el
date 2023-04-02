@@ -191,16 +191,17 @@ arguments.  You can check the limitation by command, for example
 
 ;;;###autoload
 (defun php-runtime-expr (php-expr &optional input-buffer)
-  "Evalute and echo PHP expression PHP-EXPR.
+  "Evaluate and echo PHP expression PHP-EXPR.
 
 Pass INPUT-BUFFER to PHP executable as STDIN."
   (php-runtime-eval (format "echo %s;" php-expr) input-buffer))
 
 ;;;###autoload
 (defun php-runtime-eval (code &optional input-buffer output-buffer)
-  "Evalute PHP code CODE without open tag, and return buffer.
+  "Evaluate PHP code CODE without open tag, and return buffer.
 
-Pass INPUT-BUFFER to PHP executable as STDIN."
+Pass INPUT-BUFFER to PHP executable as STDIN.
+Pass OUTPUT-BUFFER to PHP executable as STDOUT."
   (let ((executor (php-runtime-execute :code (if (php-runtime-string-has-null-byte code)
                                       (cons :file (php-runtime--save-temp-script code))
                                     (cons :string code))
