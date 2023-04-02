@@ -222,5 +222,10 @@ Pass INPUT-BUFFER to PHP executable as STDIN."
       (when php-runtime--kill-temp-output-buffer
         (kill-buffer (php-runtime-stdout-buffer executor))))))
 
+;;;###autoload
+(defun php-runtime-extension-loaded-p (extension)
+  "Return T if EXTENSION is loaded."
+  (string= "1" (php-runtime-expr (format "extension_loaded(%s)" (php-runtime-quote-string extension)))))
+
 (provide 'php-runtime)
 ;;; php-runtime.el ends here
