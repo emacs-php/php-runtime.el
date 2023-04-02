@@ -7,7 +7,7 @@
 ;; Version: 0.2.0
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
-;; Package-Requires: ((emacs "25.1") (s "1.7"))
+;; Package-Requires: ((emacs "25.1") (compat "29"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -37,8 +37,8 @@
 ;;; Code:
 (eval-when-compile
   (require 'cl-lib))
+(require 'compat nil t)
 (require 'eieio)
-(require 's)
 
 (defgroup php-runtime nil
   "Language binding bridge to PHP."
@@ -101,7 +101,8 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
 
 (defun php-runtime-quote-string (string)
   "Quote STRING for PHP's single quote literal."
-  (concat "'" (s-replace "'" "\\'" (s-replace "\\" "\\\\" string)) "'"))
+  (let ((quoted (string-replace "'" "\\'" (string-replace "\\" "\\\\" string))))
+    (concat "'" quoted "'")))
 
 (defalias 'php-runtime-\' #'php-runtime-quote-string)
 
