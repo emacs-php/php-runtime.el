@@ -53,7 +53,6 @@
 
 (defconst php-runtime-php-open-tag "<?php ")
 (defconst php-runtime-error-buffer-name "*PHP Error Messages*")
-(defconst php-runtime--null (eval-when-compile (char-to-string 0)))
 
 (defvar php-runtime--kill-temp-output-buffer t)
 (defvar php-runtime--eval-temp-script-name nil)
@@ -96,8 +95,10 @@ for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
     (error output)))
 
 (defun php-runtime-string-has-null-byte (string)
-  "Return T when STRING has null bytes."
-  (s-contains-p php-runtime--null string))
+  "Return non-NIL when STRING has null bytes."
+  (funcall
+   (eval-when-compile (if (fboundp 'seq-contains-p) #'seq-contains-p 'seq-contains))
+   string 0))
 
 (defun php-runtime-quote-string (string)
   "Quote STRING for PHP's single quote literal."
