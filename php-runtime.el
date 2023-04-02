@@ -39,6 +39,8 @@
   (require 'cl-lib))
 (require 'compat nil t)
 (require 'eieio)
+(when (eval-when-compile (require 'shortdoc nil t))
+  (require 'php-runtime-shortdoc))
 
 (defgroup php-runtime nil
   "Language binding bridge to PHP."
