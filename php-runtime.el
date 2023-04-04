@@ -4,7 +4,7 @@
 
 ;; Author: USAMI Kenta <tadsan@zonu.me>
 ;; Created: 28 Aug 2017
-;; Version: 0.3.0
+;; Version: 0.3.1
 ;; Keywords: processes php lisp
 ;; URL: https://github.com/emacs-php/php-runtime.el
 ;; Package-Requires: ((emacs "25.1") (compat "29"))
