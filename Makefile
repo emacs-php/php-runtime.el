@@ -1,16 +1,19 @@
 EMACS ?= emacs
-ELS = php-runtime.el php-runtime-test.el
-ELCS = $(ELS:.el=.elc)
+EASK ?= eask
 
-%.elc: %.el
-	$(EMACS) -Q -batch -L . -f batch-byte-compile $<
+install:
+	$(EASK) package
+	$(EASK) install
 
-all: $(ELCS)
+compile:
+	$(EASK) compile
+
+all: clean install compile test
 
 clean:
-	rm -f $(ELCS)
+	$(EASK) clean all
 
-test: clean all
-	$(EMACS) -Q --batch -L . -l php-runtime-test.el -f ert-run-tests-batch-and-exit
+test:
+	$(EASK)	test ert ./php-runtime-test.el
 
 .PHONY: clean test
