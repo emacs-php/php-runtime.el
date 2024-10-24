@@ -1,5 +1,6 @@
-;;; php-runtime-test.el --- Unit tests for php-runtime package.
+;;; php-runtime-test.el --- Unit tests for php-runtime package   -*- lexical-binding: t -*-
 
+;; Copyright (C) 2024 Friends of Emacs-PHP development
 ;; Copyright (C) 2017 USAMI Kenta
 
 ;; Author: USAMI Kenta <tadsan@zonu.me>
@@ -7,7 +8,7 @@
 ;; Version: 0.2.0
 ;; Keywords: processes php
 ;; URL: https://github.com/emacs-php/php-runtime.el
-;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -33,7 +34,6 @@
 
 
 ;;; Code:
-
 (require 'php-runtime)
 (require 'ert)
 
