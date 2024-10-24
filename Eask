@@ -1,5 +1,5 @@
 (package "php-runtime"
-         "0.3.1"
+         "0.3.2"
          "Language binding bridge to PHP")
 
 (website-url "https://github.com/emacs-php/php-runtime.el")
