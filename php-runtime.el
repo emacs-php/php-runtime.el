@@ -65,9 +65,9 @@
   (generate-new-buffer "*PHP temp*"))
 
 (defun php-runtime--stdin-satisfied-p (obj)
-  "Return t if the object `OBJ' is satisfied to stdin format.
+  "Return non-NIL if the object OBJ is satisfied to stdin format.
 
-for example, (get-buffer \"foo-buffer\"), '(:file . \"/path/to/file\")."
+for example, (get-buffer \"foo-buffer\"), \\='(:file . \"/path/to/file\")."
   (cond
    ((null obj) t)
    ((and (bufferp obj) (buffer-live-p obj) t))
