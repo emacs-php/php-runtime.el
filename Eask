@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "php-runtime"
          "0.3.2"
          "Language binding bridge to PHP")
